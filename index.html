@@ -109,31 +109,23 @@ html,body{font-family:'Roboto',sans-serif;background:#fffcec;min-height:100vh;-w
   border-radius:2px 2px 0 0;
 }
 
-/* ── DROPDOWN INDICATOR ── */
-.dropdown-bar{
-  background:#fed839;
-  overflow:hidden;
-  max-height:0;
-  transition:max-height .15s ease;
-  position:relative;
-  z-index:10;
-}
-.dropdown-bar.open{max-height:40px}
-.dropdown-bar-inner{
-  height:40px;
-  display:flex;
-  align-items:flex-end;
-  padding:0 0 0 0;
-  position:relative;
-}
-.dropdown-red-line{
+/* ── DROPDOWN INDICATOR (CSS-only, 3 tabs only) ── */
+.nav-item.has-dropdown::after{
+  content:'';
+  display:block;
   position:absolute;
-  bottom:0;
   left:0;
-  height:4px;
+  right:0;
+  top:100%;
+  height:5px;
   background:#d74134;
-  border-radius:2px 2px 0 0;
-  transition:width .15s ease, left .15s ease;
+  border-radius:0 0 2px 2px;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .12s ease;
+}
+.nav-item.has-dropdown:hover::after{
+  opacity:1;
 }
 
 /* ── PAGE CONTENT ── */
@@ -473,13 +465,6 @@ html,body{font-family:'Roboto',sans-serif;background:#fffcec;min-height:100vh;-w
   </div>
 </nav>
 
-<!-- Dropdown indicator bar (desktop only) -->
-<div class="dropdown-bar" id="dropdown-bar">
-  <div class="dropdown-bar-inner">
-    <div class="dropdown-red-line" id="dropdown-red-line" style="width:60px;left:0"></div>
-  </div>
-</div>
-
 <!-- ── PAGE BODY ── -->
 <div class="page-body">
 
@@ -560,11 +545,8 @@ html,body{font-family:'Roboto',sans-serif;background:#fffcec;min-height:100vh;-w
 (function(){
   var navItems = document.querySelectorAll('.nav-item');
   var underline = document.getElementById('nav-underline');
-  var dropBar = document.getElementById('dropdown-bar');
-  var dropLine = document.getElementById('dropdown-red-line');
   var navLinks = document.getElementById('nav-links');
   var hamburger = document.getElementById('hamburger');
-  var dropTimeout = null;
 
   // ── Position the underline under a given nav-item ──
   function positionUnderline(item) {
@@ -589,42 +571,13 @@ html,body{font-family:'Roboto',sans-serif;background:#fffcec;min-height:100vh;-w
     if (panel) panel.classList.add('active');
   }
 
-  // ── Dropdown show/hide ──
-  function showDropdown(item) {
-    if (window.innerWidth <= 900) return;
-    clearTimeout(dropTimeout);
-    var navbarEl = document.getElementById('navbar');
-    var navRect = navbarEl.getBoundingClientRect();
-    var itemRect = item.getBoundingClientRect();
-    dropBar.classList.add('open');
-    dropLine.style.width = itemRect.width + 'px';
-    dropLine.style.left = (itemRect.left - navRect.left + navbarEl.scrollLeft) + 'px';
-  }
-
-  function hideDropdown() {
-    dropTimeout = setTimeout(function() {
-      dropBar.classList.remove('open');
-    }, 80);
-  }
-
   // ── Tab click ──
   navItems.forEach(function(item) {
     item.addEventListener('click', function(e) {
       e.preventDefault();
       setActive(this);
     });
-
-    // Hover color — handled purely by CSS
-    // Dropdown on hover for specific tabs
-    if (item.classList.contains('has-dropdown')) {
-      item.addEventListener('mouseenter', function() { showDropdown(this); });
-      item.addEventListener('mouseleave', function() { hideDropdown(); });
-    }
   });
-
-  // keep dropdown alive while hovering it
-  dropBar.addEventListener('mouseenter', function() { clearTimeout(dropTimeout); });
-  dropBar.addEventListener('mouseleave', function() { hideDropdown(); });
 
   // ── Hamburger ──
   hamburger.addEventListener('click', function() {
